@@ -1,0 +1,32 @@
+name: Fetch and Save Weather Data
+
+on:
+  schedule:
+    - cron: '*/5 * * * *'   # Chạy mỗi 5 phút
+  workflow_dispatch:        # Cho phép chạy tay khi cần
+
+jobs:
+  fetch_and_save:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Install requests
+        run: pip install requests
+
+      - name: Fetch data from API and append to CSV
+        run: |
+          python fetch_and_append.py
+
+      - name: Commit and push changes
+        run: |
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git add history.csv
+          git commit -m "[bot] Append weather data" || echo "No changes to commit"
+          git push
